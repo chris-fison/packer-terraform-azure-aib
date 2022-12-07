@@ -13,3 +13,48 @@
   "location": "",
   "vm_size": ""
 },
+
+  "builders": [{
+  "type": "azure-arm",
+  "client_id": "{{user `client_id`}}",
+  "client_secret": "{{user `client_secret`}}",
+  "subscription_id": "{{user `subscription_id`}}",
+  "tenant_id": "{{user `tenant_id`}}",
+  "managed_image_resource_group_name": "{{user    `managed_image_resource_group_name`}}",
+  "managed_image_name": "{{user `managed_image_name`}}",
+  "os_type": "Windows",
+  "image_publisher": "{{user `publisher`}}",
+  "image_offer": "{{user `offer`}}",
+  "image_sku": "{{user `sku`}}",
+  "communicator": "winrm",
+  "winrm_use_ssl": "true",
+  "winrm_insecure": "true",
+  "winrm_timeout": "3m",
+  "winrm_username": "packer",
+  "location": "{{user `location`}}",
+  "vm_size": "{{user `vm_size`}}",
+  "async_resourcegroup_delete": true
+}],
+  
+  "provisioners": [
+ {
+   "type": "powershell",
+   "inline": [
+   "Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools",
+   "Install-WindowsFeature -Name DNS -IncludeManagementTools"
+   ]
+ },
+ {
+   "type": "windows-restart",
+   "restart_check_command": "powershell -command \"&amp; {Write-Output 'Machine restarted.'}\""
+ },
+ {
+   "type": "powershell",
+   "inline": [
+   "if( Test-Path $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml ){ rm $Env:SystemRoot\\windows\\system32\\Sysprep\\unattend.xml -Force}",
+   "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit /mode:vm",
+   "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; Write-Output $imageState.ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Start-Sleep -s 10 } else { break } }"
+   ]
+ }
+ ]
+}
