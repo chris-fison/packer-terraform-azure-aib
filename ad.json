@@ -1,0 +1,15 @@
+{
+  "variables": {
+  "client_id": "",
+  "client_secret": "",
+  "tenant_id": "",
+  "subscription_id": "",
+  "managed_image_name": "",
+  "managed_image_resource_group_name": "",
+  "WorkingDirectory": "{{env `System_DefaultWorkingDirectory`}}",
+  "publisher": "",
+  "offer": "",
+  "sku": "",
+  "location": "",
+  "vm_size": ""
+},
